@@ -17,7 +17,7 @@ vpath .base build
 ########################################################
 
 # your C compiler:
-CC       = gcc
+CC       = /usr/local/bin/gcc-6
 #CC       = icc
 #CC       = pgcc
 

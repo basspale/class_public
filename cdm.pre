@@ -1,0 +1,4 @@
+k_step_sub = 1e-6
+k_step_super = 0.001
+k_min_tau0 = 10.0
+k_step_super_reduction = 0.02
