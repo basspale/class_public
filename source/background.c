@@ -546,6 +546,7 @@ int background_init(
   class_test((pba->T_cmb < _TCMB_SMALL_)||(pba->T_cmb > _TCMB_BIG_),
              pba->error_message,
              "T_cmb=%g out of bounds (%g<T_cmb<%g)",pba->T_cmb,_TCMB_SMALL_,_TCMB_BIG_);
+  printf("T_cmb=%e\n", pba->T_cmb);
 
   /* H0 in Mpc^{-1} */
   class_test((pba->Omega0_k < _OMEGAK_SMALL_)||(pba->Omega0_k > _OMEGAK_BIG_),
@@ -569,6 +570,7 @@ int background_init(
              n_ncdm+1,
              pba->m_ncdm_in_eV[n_ncdm],
              pba->m_ncdm_in_eV[n_ncdm]*pba->deg_ncdm[n_ncdm]/pba->Omega0_ncdm[n_ncdm]/pba->h/pba->h);
+      printf("omega_ncdm=%e\n", pba->Omega0_ncdm[n_ncdm]*pba->h*pba->h);
     }
   }
 
@@ -967,7 +969,17 @@ int background_ncdm_distribution(
     /**f0 = 1.0/pow(2*_PI_,3)*(1./(exp(q-ksi)+1.) +1./(exp(q+ksi)+1.));*/
     
     *f0 = pow(q,param[0])*exp(-param[1]*q);
-    /**f0 = 1.0/(exp(q)+1);*/
+    
+    /* double factor = 4*pow(_PI_,4)/45/1.80309; */
+    /* double mwdm = param[0]; */
+    /* double omega_wdm = param[1]; */
+    /* double s0 = 2891.2*pow(pba->T_cmb/2.7255,3); */
+    /* double rho_c = 10537.1; */
+    /* double rho_over_s0 = rho_c/s0; */
+    /* double T_wdm3 = factor*omega_wdm*rho_over_s0/mwdm; */
+    /*printf("mwdm=%f, omega_wdm=%f, T_wdm/T_0=%f, omega_check=%f\n", mwdm, omega_wdm, T_wdm3, T_wdm3*mwdm/factor/rho_over_s0);*/
+    /* pba->T_ncdm[n_ncdm] = pow(T_wdm3,1.0/3.0); */
+    /* *f0 = 4*T_wdm3/pow(2*_PI_,3)/(exp(q)+1); */
     
     /**************************************************/
 
