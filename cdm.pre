@@ -1,4 +1,7 @@
-k_step_sub = 1e-6
+k_step_sub = 1e-10
 k_step_super = 0.001
-k_min_tau0 = 10.0
-k_step_super_reduction = 0.02
+k_min_tau0 = 1.0
+k_step_super_reduction = 0.0002
+
+tol_ncdm_synchronous = 1.0e-4
+tol_ncdm_bg = 1.0e-5
