@@ -966,18 +966,9 @@ int background_ncdm_distribution(
     /*    FERMI-DIRAC INCLUDING CHEMICAL POTENTIALS   */
     /**************************************************/
     
-    *f0 = pow(q, param[0])*exp(-param[1]*q);
+    /**f0 = pow(q, param[0])*exp(-param[1]*q);*/
     
-    /* double factor = 4*pow(_PI_,4)/45/1.80309; */
-    /* double mwdm = param[0]; */
-    /* double omega_wdm = param[1]; */
-    /* double s0 = 2891.2*pow(pba->T_cmb/2.7255,3); */
-    /* double rho_c = 10537.1; */
-    /* double rho_over_s0 = rho_c/s0; */
-    /* double T_wdm3 = factor*omega_wdm*rho_over_s0/mwdm; */
-    /*printf("mwdm=%f, omega_wdm=%f, T_wdm/T_0=%f, omega_check=%f\n", mwdm, omega_wdm, T_wdm3, T_wdm3*mwdm/factor/rho_over_s0);*/
-    /* pba->T_ncdm[n_ncdm] = pow(T_wdm3,1.0/3.0); */
-    /* *f0 = 4*T_wdm3/pow(2*_PI_,3)/(exp(q)+1); */
+    *f0 = pow(q, param[0])*exp(-param[1]*q)*log(1.0+1.0/pow(q, param[2]));
     
     /**************************************************/
 
