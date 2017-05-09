@@ -966,9 +966,13 @@ int background_ncdm_distribution(
     /*    FERMI-DIRAC INCLUDING CHEMICAL POTENTIALS   */
     /**************************************************/
 
+    /* Thermal distribution */
+
     /* *f0 = 1.0/pow(2*_PI_,3)*(1./(exp(q-ksi)+1.) +1./(exp(q+ksi)+1.)); */
-    *f0 = 1./(exp(q)+1.);
-   
+    /* *f0 = 1./(exp(q)+1.); */
+
+    /* Non-thermal distribution */
+    *f0 = pow(q, param[0]-2)*exp(-param[1]*q);
     
     /**************************************************/
 
