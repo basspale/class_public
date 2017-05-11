@@ -972,7 +972,7 @@ int background_ncdm_distribution(
     /* *f0 = 1./(exp(q)+1.); */
 
     /* Non-thermal distribution */
-    *f0 = pow(q, param[0]-2)*exp(-param[1]*q);
+    *f0 = pow(q, param[0]-2.)*exp(-param[1]*q);
     
     /**************************************************/
 
