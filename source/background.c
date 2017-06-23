@@ -971,9 +971,13 @@ int background_ncdm_distribution(
       /* *f0 = 1.0/pow(2*_PI_,3)*(1./(exp(q-ksi)+1.) +1./(exp(q+ksi)+1.)); */
       *f0 = 1./(exp(q)+1.);
     }
-    else{
+    else if (param[0]==1){
       /* Non-thermal distribution */
       *f0 = pow(q, param[1]-2.)*exp(-param[2]*q);
+    }
+    else if(param[0]==2){
+      /* Non-thermal distribution, Superposition*/
+      *f0 = pow(q, param[1]-2.)*exp(-param[2]*q) + pow(q, param[3]-2.)*exp(-param[4]*q);
     }
     /**************************************************/
 
