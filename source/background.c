@@ -977,7 +977,7 @@ int background_ncdm_distribution(
     }
     else if(param[0]==2){
       /* Non-thermal distribution, Superposition*/
-      *f0 = pow(q, param[1]-2.)*exp(-param[2]*q) + param[3]*pow(q, param[4]-2.)*exp(-param[5]*q);
+      *f0 = param[1]*pow(q, param[2]-2.)*exp(-param[3]*q) + param[4]*pow(q, param[5]-2.)*exp(-param[6]*q);
     }
     /**************************************************/
 
