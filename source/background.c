@@ -979,6 +979,7 @@ int background_ncdm_distribution(
       /* Non-thermal distribution, Superposition*/
       *f0 = param[1]*pow(q, param[2]-2.)*exp(-param[3]*q) + param[4]*pow(q, param[5]-2.)*exp(-param[6]*q);
     }
+
     /**************************************************/
 
     /** This form is only appropriate for approximate studies, since in
