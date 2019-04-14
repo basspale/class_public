@@ -979,6 +979,21 @@ int background_ncdm_distribution(
       /* Non-thermal distribution, Superposition*/
       *f0 = param[1]*pow(q, param[2]-2.)*exp(-param[3]*q) + param[4]*pow(q, param[5]-2.)*exp(-param[6]*q);
     }
+    else if(param[0]==3){
+      /* Analytic formulas for Freeze-in DM*/
+      yf = param[1];
+      r = param[2];
+      if (r < 0.8){
+	*f0 = pow(q*(1-r*r), -0.5)*exp(q/(1-r*r))\
+	  + yf*yf/(4*M_PI*M_PI)*((2-r*r)*atanh(sqrt(1-r*r))-sqrt(1-r*r))/3.0/pow(1-r*r, 1.5)*pow(q, -0.5)exp(-q)\
+	  + yf*yf/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2q-3)*pow(r, 2)+pow(r,4))*erfc(sqrt(q/(1-r*r)))*exp(q/(1-r*r)) - 2*sqrt(M_PI)*r*r*sqrt((1-r*r))*pow(q, 0.5));
+	  }
+      else{
+	*f0 = pow(q*(1-r*r), -0.5)*exp(q/(1-r*r))\
+	  + yf*yf/(4*M_PI*M_PI)*(4.0/9.0+16.0/45.0*(1-r)+88.0/315.0*pow(1-r, 2)+208.0/945.0*pow(1-r, 3)+1828.0/10395.0*pow(1-r,4))*pow(q, -0.5)exp(-q) \
+	  + yf*yf/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2q-3)*pow(r, 2)+pow(r,4))*erfc(sqrt(q/(1-r*r)))*exp(q/(1-r*r)) - 2*sqrt(M_PI)*r*r*sqrt((1-r*r))*pow(q, 0.5));
+	  }
+    }
 
     /**************************************************/
 
