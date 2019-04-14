@@ -1,0 +1,5 @@
+# List of input/precision parameters passed
+# but not used (just for info)
+#
+tol_ncdm = 1.e-4;
+write warnings = y
