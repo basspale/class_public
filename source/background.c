@@ -988,28 +988,28 @@ int background_ncdm_distribution(
 	if (q/(1-param[1]*param[1]) < 5.){
 	  *f0 = pow(q*(1-param[1]*param[1]), -0.5)*exp(-q/(1-param[1]*param[1])) \
 	    + param[2]*param[2]/(4*M_PI*M_PI)*((2-param[1]*param[1])*atanh(sqrt(1-param[1]*param[1]))-sqrt(1-param[1]*param[1]))/3.0/pow(1-param[1]*param[1], 1.5)*pow(q, -0.5)*exp(-q)
-	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*erfc(sqrt(q/(1-param[1]*param[1])))*exp(q/(1-param[1]*param[1])) - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5));
+	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*erfc(sqrt(q/(1-param[1]*param[1])))*exp(q/(1-param[1]*param[1])) - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5))/4.0/pow(1-param[1]*param[1],2.5);
 	}
 	else{
 	  *f0 = pow(q*(1-param[1]*param[1]), -0.5)*exp(-q/(1-param[1]*param[1])) \
 	    + param[2]*param[2]/(4*M_PI*M_PI)*((2-param[1]*param[1])*atanh(sqrt(1-param[1]*param[1]))-sqrt(1-param[1]*param[1]))/3.0/pow(1-param[1]*param[1], 1.5)*pow(q, -0.5)*exp(-q)
 	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)\
 	    *(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*pow(M_PI,-0.5)*(pow(q/(1-param[1]*param[1]),-0.5)-0.5*pow(q/(1-param[1]*param[1]),-1.5)+0.75*pow(q/(1-param[1]*param[1]),-2.5)-1.875*pow(q/(1-param[1]*param[1]),-3.5))\
-	      - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5));
+	      - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5))/4.0/pow(1-param[1]*param[1],2.5);
 	}
       }
       else{
 	if (q/(1-param[1]*param[1]) < 5.){
 	  *f0 = pow(q*(1-param[1]*param[1]), -0.5)*exp(-q/(1-param[1]*param[1])) \
 	    + param[2]*param[2]/(4*M_PI*M_PI)*(4.0/9.0+16.0/45.0*(1-param[1])+88.0/315.0*pow(1-param[1], 2)+208.0/945.0*pow(1-param[1], 3)+1828.0/10395.0*pow(1-param[1],4))*pow(q, -0.5)*exp(-q) \
-	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*erfc(sqrt(q/(1-param[1]*param[1])))*exp(q/(1-param[1]*param[1])) - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5));
+	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*erfc(sqrt(q/(1-param[1]*param[1])))*exp(q/(1-param[1]*param[1])) - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5))/4.0/pow(1-param[1]*param[1],2.5);
 	}
 	else{
 	  *f0 = pow(q*(1-param[1]*param[1]), -0.5)*exp(-q/(1-param[1]*param[1])) \
 	    + param[2]*param[2]/(4*M_PI*M_PI)*(4.0/9.0+16.0/45.0*(1-param[1])+88.0/315.0*pow(1-param[1], 2)+208.0/945.0*pow(1-param[1], 3)+1828.0/10395.0*pow(1-param[1],4))*pow(q, -0.5)*exp(-q) \
 	    + param[2]*param[2]/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)	\
 	    *(M_PI*(2+(2*q-3)*pow(param[1], 2)+pow(param[1],4))*pow(M_PI,-0.5)*(pow(q/(1-param[1]*param[1]),-0.5)-0.5*pow(q/(1-param[1]*param[1]),-1.5)+0.75*pow(q/(1-param[1]*param[1]),-2.5)-1.875*pow(q/(1-param[1]*param[1]),-3.5))	\
-	      - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5));
+	      - 2*sqrt(M_PI)*param[1]*param[1]*sqrt((1-param[1]*param[1]))*pow(q, 0.5))/4.0/pow(1-param[1]*param[1],2.5);
 	}
       }
     }
