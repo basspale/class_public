@@ -1003,7 +1003,7 @@ int background_ncdm_distribution(
 	we use asymptotic series for q/(1-r^2)>20.
 	 If the threshold is smaller, say 5, the convergence failure occurs.
       */
-      if (q/(1-r*r) < 20.){
+      if (q/(1-r*r) < 2000.){
       	*f0 += yukawa*yukawa/(4*M_PI*M_PI)*pow(q, -0.5)*exp(-q)*(M_PI*(2+(2*q-3)*pow(r, 2)+pow(r,4))*erfc(sqrt(q/(1-r*r)))*exp(q/(1-r*r)) - 2*sqrt(M_PI)*r*r*sqrt((1-r*r))*pow(q, 0.5))/4.0/pow(1-r*r,2.5);
       }
       else{
