@@ -992,7 +992,7 @@ int background_ncdm_distribution(
 
       /* t-channel */
       if (r<0.85){
-      	*f0 += yukawa*yukawa/(4*M_PI*M_PI)*((2-r*r)*atanh(sqrt(1-r*r))-sqrt(1-r*r))/3.0/pow(1-r*r, 1.5)*pow(q, -0.5)*exp(-q);
+      	*f0 += 2.0*yukawa*yukawa/(4*M_PI*M_PI)*((2-r*r)*atanh(sqrt(1-r*r))-sqrt(1-r*r))/3.0/pow(1-r*r, 1.5)*pow(q, -0.5)*exp(-q);
       }
       else{
       	*f0 += 2.0*yukawa*yukawa/(4*M_PI*M_PI)*(4.0/9.0+16.0/45.0*(1-r)+88.0/315.0*pow(1-r, 2)+208.0/945.0*pow(1-r, 3)+1828.0/10395.0*pow(1-r,4))*pow(q, -0.5)*exp(-q);
