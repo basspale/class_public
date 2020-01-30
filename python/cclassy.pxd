@@ -13,6 +13,8 @@ DEF _LINE_LENGTH_MAX_ = 1024
 
 cdef extern from "class.h":
 
+    cdef char[10] _VERSION_
+
     ctypedef char FileArg[40]
 
     ctypedef char* ErrorMsg
@@ -24,8 +26,22 @@ cdef extern from "class.h":
         logarithmic
 
     cdef enum file_format:
-         class_format
-         camb_format
+        class_format
+        camb_format
+
+    cdef enum non_linear_method:
+        nl_none
+        nl_halofit
+        nl_HMcode
+
+    cdef enum pk_outputs:
+        pk_linear
+        pk_nonlinear
+
+    cdef enum out_sigmas:
+        out_sigma
+        out_sigma_prime
+        out_sigma_disp
 
     cdef struct precision:
         ErrorMsg error_message
@@ -36,16 +52,26 @@ cdef extern from "class.h":
         int index_bg_ang_distance
         int index_bg_lum_distance
         int index_bg_conf_distance
+        int index_bg_a
         int index_bg_H
+        int index_bg_D
+        int index_bg_f
+        int index_bg_Omega_m
         short long_info
         short inter_normal
+        short  has_ncdm
         double T_cmb
         double h
+        double H0
         double age
         double conformal_age
         double * m_ncdm_in_eV
         double Neff
+        double Omega0_g
         double Omega0_b
+        double Omega0_idr
+        double T_idr
+        double Omega0_idm_dr
         double Omega0_cdm
         double Omega0_dcdm
         double Omega0_ncdm_tot
@@ -54,8 +80,19 @@ cdef extern from "class.h":
         double w0_fld
         double wa_fld
         double cs2_fld
-
+        double Omega0_ur
+        double Omega0_dcdmdr
+        double Omega0_dr
+        double Omega0_scf
+        double Omega0_k
         int bt_size
+        double Omega0_m
+        double Omega0_r
+        double Omega0_de
+        double a_eq
+        double H_eq
+        double z_eq
+        double tau_eq
 
     cdef struct thermo:
         ErrorMsg error_message
@@ -70,12 +107,23 @@ cdef extern from "class.h":
         double rs_rec
         double ds_rec
         double da_rec
+        double z_star
+        double tau_star
+        double rs_star
+        double ds_star
+        double ra_star
+        double da_star
+        double rd_star
         double z_d
         double tau_d
         double ds_d
         double rs_d
         double YHe
         double n_e
+        double a_idm_dr
+        double b_idr
+        double nindex_idm_dr
+        double m_idm
 
         int tt_size
 
@@ -94,6 +142,7 @@ cdef extern from "class.h":
         int store_perturbations
         int k_output_values_num
         double k_output_values[_MAX_NUMBER_OF_K_FILES_]
+        double k_max_for_pk
         int index_k_output_values[_MAX_NUMBER_OF_K_FILES_]
         char scalar_titles[_MAXTITLESTRINGLENGTH_]
         char vector_titles[_MAXTITLESTRINGLENGTH_]
@@ -109,6 +158,13 @@ cdef extern from "class.h":
         int size_scalar_perturbation_data[_MAX_NUMBER_OF_K_FILES_]
         int size_vector_perturbation_data[_MAX_NUMBER_OF_K_FILES_]
         int size_tensor_perturbation_data[_MAX_NUMBER_OF_K_FILES_]
+
+        double * alpha_idm_dr
+        double * beta_idr
+
+        int * k_size
+        int * ic_size
+        int index_md_scalars
 
     cdef struct transfers:
         ErrorMsg error_message
@@ -142,8 +198,8 @@ cdef extern from "class.h":
         double n_ad_niv
         double phi_min
         double phi_max
-
         int lnk_size
+
     cdef struct spectra:
         ErrorMsg error_message
         int has_tt
@@ -155,10 +211,10 @@ cdef extern from "class.h":
         int has_dd
         int has_td
         int has_ll
+        int has_dl
         int has_tl
         int l_max_tot
         int ** l_max_ct
-        int ln_k_size
         int ct_size
         int * ic_size
         int * ic_ic_size
@@ -175,27 +231,10 @@ cdef extern from "class.h":
         int index_ct_td
         int index_ct_pd
         int index_ct_ll
-        int index_ct_tl
         int index_ct_dl
+        int index_ct_tl
         int * l_size
         int index_md_scalars
-        double* ln_k
-        double sigma8
-        double alpha_II_2_20
-        double alpha_RI_2_20
-        double alpha_RR_2_20
-        double alpha_II_21_200
-        double alpha_RI_21_200
-        double alpha_RR_21_200
-        double alpha_II_201_2500
-        double alpha_RI_201_2500
-        double alpha_RR_201_2500
-        double alpha_II_2_2500
-        double alpha_RI_2_2500
-        double alpha_RR_2_2500
-        double alpha_kp
-        double alpha_k1
-        double alpha_k2
 
     cdef struct output:
         ErrorMsg error_message
@@ -210,6 +249,7 @@ cdef extern from "class.h":
         int has_dd
         int has_td
         int has_ll
+        int has_dl
         int has_tl
         int index_lt_tt
         int index_lt_te
@@ -220,6 +260,7 @@ cdef extern from "class.h":
         int index_lt_dd
         int index_lt_td
         int index_lt_ll
+        int index_lt_dl
         int index_lt_tl
         int * l_max_lt
         int lt_size
@@ -229,7 +270,26 @@ cdef extern from "class.h":
         ErrorMsg error_message
 
     cdef struct nonlinear:
+        short has_pk_matter
         int method
+        int ic_size
+        int ic_ic_size
+        int k_size
+        int ln_tau_size
+        int tau_size
+        int index_tau_min_nl
+        double * k
+        double * ln_tau
+        double * tau
+        double ** ln_pk_l
+        double ** ln_pk_nl
+        double * sigma8
+        int has_pk_m
+        int has_pk_cb
+        int index_pk_m
+        int index_pk_cb
+        int index_pk_total
+        int index_pk_cluster
         ErrorMsg error_message
 
     cdef struct file_content:
@@ -272,21 +332,25 @@ cdef extern from "class.h":
     int thermodynamics_output_titles(void * pba, void *pth, char titles[_MAXTITLESTRINGLENGTH_])
     int thermodynamics_output_data(void *pba, void *pth, int number_of_titles, double *data)
 
+    int perturb_output_data(void *pba,void *ppt, file_format output_format, double z, int number_of_titles, double *data)
+    int perturb_output_firstline_and_ic_suffix(void *ppt, int index_ic, char first_line[_LINE_LENGTH_MAX_], FileName ic_suffix)
+    int perturb_output_titles(void *pba, void *ppt,  file_format output_format, char titles[_MAXTITLESTRINGLENGTH_])
+
     int primordial_output_titles(void * ppt, void *ppm, char titles[_MAXTITLESTRINGLENGTH_])
     int primordial_output_data(void *ppt, void *ppm, int number_of_titles, double *data)
 
-    int spectra_output_tk_titles(void *pba, void *ppt,  file_format output_format, char titles[_MAXTITLESTRINGLENGTH_])
-    int spectra_output_tk_data(void *pba,void *ppt,void *psp,  file_format output_format, double z, int number_of_titles, double *data)
-
     int spectra_cl_at_l(void* psp,double l,double * cl,double * * cl_md,double * * cl_md_ic)
     int lensing_cl_at_l(void * ple,int l,double * cl_lensed)
+
     int spectra_pk_at_z(
         void * pba,
         void * psp,
         int mode,
         double z,
         double * output_tot,
-        double * output_ic
+        double * output_ic,
+        double * output_cb_tot,
+        double * output_cb_ic
         )
 
     int spectra_pk_at_k_and_z(
@@ -296,7 +360,9 @@ cdef extern from "class.h":
         double k,
         double z,
         double * pk,
-        double * pk_ic)
+        double * pk_ic,
+        double * pk_cb,
+        double * pk_cb_ic)
 
     int spectra_pk_nl_at_k_and_z(
         void* pba,
@@ -304,15 +370,92 @@ cdef extern from "class.h":
         void * psp,
         double k,
         double z,
-        double * pk)
+        double * pk,
+        double * pk_cb)
 
     int spectra_pk_nl_at_z(
         void * pba,
         void * psp,
         int mode,
         double z,
-        double * output_tot)
+        double * output_tot,
+        double * output_cb_tot)
 
-    int nonlinear_k_nl_at_z(void* pba, void* pnl, double z, double* k_nl)
+    int nonlinear_pk_at_k_and_z(
+        void * pba,
+        void * ppm,
+        void * pnl,
+        int pk_output,
+        double k,
+        double z,
+        int index_pk,
+        double * out_pk,
+        double * out_pk_ic)
+
+    int nonlinear_pk_tilt_at_k_and_z(
+        void * pba,
+        void * ppm,
+        void * pnl,
+        int pk_output,
+        double k,
+        double z,
+        int index_pk,
+        double * pk_tilt)
+
+    int nonlinear_sigmas_at_z(
+        void * ppr,
+        void * pba,
+        void * pnl,
+        double R,
+        double z,
+        int index_pk,
+        int sigma_output,
+        double * result)
+
+    int nonlinear_pks_at_kvec_and_zvec(
+        void * pba,
+        void * pnl,
+        int pk_output,
+        double * kvec,
+        int kvec_size,
+        double * zvec,
+        int zvec_size,
+        double * out_pk,
+        double * out_pk_cb)
+
+    int nonlinear_hmcode_sigma8_at_z(void* pba, void* pnl, double z, double* sigma_8, double* sigma_8_cb)
+    int nonlinear_hmcode_sigmadisp_at_z(void* pba, void* pnl, double z, double* sigma_disp, double* sigma_disp_cb)
+    int nonlinear_hmcode_sigmadisp100_at_z(void* pba, void* pnl, double z, double* sigma_disp_100, double* sigma_disp_100_cb)
+    int nonlinear_hmcode_sigmaprime_at_z(void* pba, void* pnl, double z, double* sigma_prime, double* sigma_prime_cb)
+    int nonlinear_hmcode_window_nfw(void* pnl, double k, double rv, double c, double* window_nfw)
+
+    int nonlinear_k_nl_at_z(void* pba, void* pnl, double z, double* k_nl, double* k_nl_cb)
 
     int spectra_firstline_and_ic_suffix(void *ppt, int index_ic, char first_line[_LINE_LENGTH_MAX_], FileName ic_suffix)
+
+    int spectra_sigma(
+                  void * pba,
+                  void * ppm,
+                  void * psp,
+                  double R,
+                  double z,
+                  double * sigma)
+
+    int spectra_sigma_cb(
+                  void * pba,
+                  void * ppm,
+                  void * psp,
+                  double R,
+                  double z,
+                  double * sigma_cb)
+
+    int spectra_fast_pk_at_kvec_and_zvec(
+                  void * pba,
+                  void * psp,
+                  double * kvec,
+                  int kvec_size,
+                  double * zvec,
+                  int zvec_size,
+                  double * pk_tot_out,
+                  double * pk_cb_tot_out,
+                  int nonlinear)

@@ -10,7 +10,17 @@
 #include "dei_rkck.h"
 #include "parser.h"
 
+//The name for this macro can be at most 30 characters total
+#define _class_print_species_(name,type) \
+printf("-> %-30s Omega = %-15g , omega = %-15g\n",name,pba->Omega0_##type,pba->Omega0_##type*pba->h*pba->h);
+
+/** list of possible types of spatial curvature */
+
 enum spatial_curvature {flat,open,closed};
+
+/** list of possible parametrisations of the DE equation of state */
+
+enum equation_of_state {CLP,EDE};
 
 /**
  * All background parameters and evolution that other modules need to know.
@@ -49,17 +59,33 @@ struct background
 
   double Omega0_lambda; /**< \f$ \Omega_{0_\Lambda} \f$: cosmological constant */
 
-  double Omega0_fld; /**< \f$ \Omega_{0 de} \f$: fluid with constant
-			\f$ w \f$ and \f$ c_s^2 \f$ */
+  double Omega0_fld; /**< \f$ \Omega_{0 de} \f$: fluid */
+
+  enum equation_of_state fluid_equation_of_state; /**< parametrisation scheme for fluid equation of state */
+
   double w0_fld; /**< \f$ w0_{DE} \f$: current fluid equation of state parameter */
   double wa_fld; /**< \f$ wa_{DE} \f$: fluid equation of state parameter derivative */
+  double Omega_EDE; /**< \f$ wa_{DE} \f$: Early Dark Energy density parameter */
 
   double cs2_fld; /**< \f$ c^2_{s~DE} \f$: sound speed of the fluid
 		     in the frame comoving with the fluid (so, this is
 		     not [delta p/delta rho] in the synchronous or
-		     newtonian gauge!!!) */
+		     newtonian gauge!) */
+
+  short use_ppf; /**< flag switching on PPF perturbation equations
+                    instead of true fluid equations for
+                    perturbations. It could have been defined inside
+                    perturbation structure, but we leave it here in
+                    such way to have all fld parameters grouped. */
+
+  double c_gamma_over_c_fld; /**< ppf parameter defined in eq. (16) of 0808.3125 [astro-ph] */
 
   double Omega0_ur; /**< \f$ \Omega_{0 \nu r} \f$: ultra-relativistic neutrinos */
+
+  double Omega0_idr; /**< \f$ \Omega_{0 idr} \f$: interacting dark radiation */
+  double T_idr;      /**< \f$ T_{idr} \f$: current temperature of interacting dark radiation in Kelvins */
+
+  double Omega0_idm_dr; /**< \f$ \Omega_{0 idm_dr} \f$: dark matter interacting with dark radiation */
 
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
 
@@ -128,7 +154,13 @@ struct background
   double Neff; /**< so-called "effective neutrino number", computed at earliest time in interpolation table */
   double Omega0_dcdm; /**< \f$ \Omega_{0 dcdm} \f$: decaying cold dark matter */
   double Omega0_dr; /**< \f$ \Omega_{0 dr} \f$: decay radiation */
-
+  double Omega0_m;  /**< total non-relativistic matter today */
+  double Omega0_r;  /**< total ultra-relativistic radiation today */
+  double Omega0_de; /**< total dark energy density today, currently defined as 1 - Omega0_m - Omega0_r - Omega0_k */
+  double a_eq;      /**< scale factor at radiation/matter equality */
+  double H_eq;      /**< Hubble rate at radiation/matter equality [Mpc^-1] */
+  double z_eq;      /**< redshift at radiation/matter equality */
+  double tau_eq;    /**< conformal time at radiation/matter equality [Mpc] */
 
   //@}
 
@@ -154,8 +186,11 @@ struct background
   int index_bg_rho_b;         /**< baryon density */
   int index_bg_rho_cdm;       /**< cdm density */
   int index_bg_rho_lambda;    /**< cosmological constant density */
-  int index_bg_rho_fld;       /**< fluid with constant w density */
+  int index_bg_rho_fld;       /**< fluid density */
+  int index_bg_w_fld;         /**< fluid equation of state */
   int index_bg_rho_ur;        /**< relativistic neutrinos/relics density */
+  int index_bg_rho_idm_dr;    /**< density of dark matter interacting with dark radiation */
+  int index_bg_rho_idr;       /**< density of interacting dark radiation */
   int index_bg_rho_dcdm;      /**< dcdm density */
   int index_bg_rho_dr;        /**< dr density */
 
@@ -166,10 +201,15 @@ struct background
   int index_bg_ddV_scf;       /**< scalar field potential second derivative V'' */
   int index_bg_rho_scf;       /**< scalar field energy density */
   int index_bg_p_scf;         /**< scalar field pressure */
+  int index_bg_p_prime_scf;         /**< scalar field pressure */
 
   int index_bg_rho_ncdm1;     /**< density of first ncdm species (others contiguous) */
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
+
+  int index_bg_rho_tot;       /**< Total density */
+  int index_bg_p_tot;         /**< Total pressure */
+  int index_bg_p_tot_prime;   /**< Conf. time derivative of total pressure */
 
   int index_bg_Omega_r;       /**< relativistic density fraction (\f$ \Omega_{\gamma} + \Omega_{\nu r} \f$) */
 
@@ -183,8 +223,8 @@ struct background
   int index_bg_time;          /**< proper (cosmological) time in Mpc */
   int index_bg_rs;            /**< comoving sound horizon in Mpc */
 
-  int index_bg_D;             /**< density growth factor in dust universe, \f$ D = H \int [da/(aH)^3] \f$ (arbitrary normalization) */
-  int index_bg_f;             /**< velocity growth factor in dust universe, [dlnD]/[dln a] */
+  int index_bg_D;             /**< scale independent growth factor D(a) for CDM perturbations */
+  int index_bg_f;             /**< corresponding velocity growth factor [dlnD]/[dln a] */
 
   int bg_size_short;  /**< size of background vector in the "short format" */
   int bg_size_normal; /**< size of background vector in the "normal format" */
@@ -229,13 +269,15 @@ struct background
   int index_bi_a;       /**< {B} scale factor */
   int index_bi_rho_dcdm;/**< {B} dcdm density */
   int index_bi_rho_dr;  /**< {B} dr density */
+  int index_bi_rho_fld; /**< {B} fluid density */
   int index_bi_phi_scf;       /**< {B} scalar field value */
   int index_bi_phi_prime_scf; /**< {B} scalar field derivative wrt conformal time */
 
   int index_bi_time;    /**< {C} proper (cosmological) time in Mpc */
   int index_bi_rs;      /**< {C} sound horizon */
   int index_bi_tau;     /**< {C} conformal time in Mpc */
-  int index_bi_growth;  /**< {C} integral over \f$ [da/(aH)^3]=[d\tau/(aH^2)]\f$, useful for growth factor */
+  int index_bi_D;       /**< {C} scale independent growth factor D(a) for CDM perturbations. */
+  int index_bi_D_prime; /**< {C} D satisfies \f$ [D''(\tau)=-aHD'(\tau)+3/2 a^2 \rho_M D(\tau) \f$ */
 
   int bi_B_size;        /**< Number of {B} parameters */
   int bi_size;          /**< Number of {B}+{C} parameters */
@@ -260,6 +302,8 @@ struct background
   short has_lambda;    /**< presence of cosmological constant? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
+  short has_idr;       /**< presence of interacting dark radiation? */
+  short has_idm_dr;    /**< presence of dark matter interacting with dark radiation? */
   short has_curvature; /**< presence of global spatial curvature? */
 
   //@}
@@ -270,7 +314,9 @@ struct background
 
 
   //@{
-
+  int * ncdm_quadrature_strategy; /**< Vector of integers according to quadrature strategy. */
+  int * ncdm_input_q_size; /**< Vector of numbers of q bins */
+  double * ncdm_qmax;   /**< Vector of maximum value of q */
   double ** q_ncdm_bg;  /**< Pointers to vectors of background sampling in q */
   double ** w_ncdm_bg;  /**< Pointers to vectors of corresponding quadrature weights w */
   double ** q_ncdm;     /**< Pointers to vectors of perturbation sampling in q */
@@ -367,6 +413,12 @@ extern "C" {
 			double * pvecback
 			);
 
+  int background_tau_of_z(
+                          struct background *pba,
+                          double z,
+                          double * tau
+                          );
+
   int background_functions(
 			   struct background *pba,
 			   double * pvecback_B,
@@ -374,11 +426,12 @@ extern "C" {
 			   double * pvecback
 			   );
 
-  int background_tau_of_z(
-			  struct background *pba,
-			  double z,
-			  double * tau
-			  );
+  int background_w_fld(
+                       struct background * pba,
+                       double a,
+                       double * w_fld,
+                       double * dw_over_da_fld,
+                       double * integral_fld);
 
   int background_init(
 		      struct precision *ppr,
@@ -392,6 +445,10 @@ extern "C" {
   int background_free_input(
                             struct background *pba
                             );
+
+  int background_free_noinput(
+                    struct background *pba
+                    );
 
   int background_indices(
 			 struct background *pba
@@ -447,6 +504,11 @@ extern "C" {
 				    double * pvecback_integration
 				    );
 
+  int background_find_equality(
+                               struct precision *ppr,
+                               struct background *pba
+                               );
+
   int background_output_titles(struct background * pba,
                                char titles[_MAXTITLESTRINGLENGTH_]
                                );
@@ -487,6 +549,11 @@ extern "C" {
                double phi_prime
                );
 
+  /** Budget equation output */
+  int background_output_budget(
+               struct background* pba
+               );
+
 #ifdef __cplusplus
 }
 #endif
@@ -517,19 +584,15 @@ extern "C" {
 //@}
 
 /**
- * @name Some numbers useful in numerical algorithms - but not
- * affecting precision, otherwise would be in precision structure
+ * @name Some limits on possible background parameters
  */
 
 //@{
 
-#define _H0_BIG_ 1./2997.9     /**< maximal \f$ H_0 \f$ in \f$ Mpc^{-1} (h=1.0) \f$ */
-#define _H0_SMALL_ 0.3/2997.9  /**< minimal \f$ H_0 \f$ in \f$ Mpc^{-1} (h=0.3) \f$ */
-#define _TCMB_BIG_ 2.8         /**< maximal \f$ T_{cmb} \f$ in K */
-#define _TCMB_SMALL_ 2.7       /**< minimal \f$ T_{cmb}  \f$ in K */
-#define _TOLERANCE_ON_CURVATURE_ 1.e-5 /**< if \f$ | \Omega_k | \f$ smaller than this, considered as flat */
-#define _OMEGAK_BIG_ 0.5     /**< maximal \f$ Omega_k \f$ */
-#define _OMEGAK_SMALL_ -0.5  /**< minimal \f$ Omega_k \f$ */
+#define _h_BIG_ 1.5            /**< maximal \f$ h \f$ */
+#define _h_SMALL_ 0.3         /**< minimal \f$ h \f$ */
+#define _omegab_BIG_ 0.039    /**< maximal \f$ omega_b \f$ */
+#define _omegab_SMALL_ 0.005  /**< minimal \f$ omega_b \f$ */
 
 //@}
 
